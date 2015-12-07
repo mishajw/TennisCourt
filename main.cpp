@@ -19,9 +19,8 @@ int main() {
         printf("Couldn't load image");
         return -1;
     }
-
-    printf("LoG.png");
-    imshow("LoG", image);
+    
+    imshow("Image", image);
 
     waitKey(0);
 
