@@ -19,7 +19,7 @@ int main() {
         printf("Couldn't load image");
         return -1;
     }
-    
+
     imshow("Image", image);
 
     waitKey(0);
