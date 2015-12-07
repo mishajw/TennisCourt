@@ -3,13 +3,15 @@
 #include <fstream>
 #include <bitset>
 
-#define IMAGE_WIDTH 1392
-#define IMAGE_HEIGHT 550
-
 using namespace cv;
 
-std::vector<char> readByteFile(char const* fileName);
-Mat byteFileToImage(std::vector<char> bytes);
+// Globals
+int IMAGE_WIDTH = 1392;
+int IMAGE_HEIGHT = 550;
+
+// Function headers
+std::vector<char>   readByteFile        (char const* fileName);
+Mat                 byteFileToImage     (std::vector<char> bytes);
 
 int main() {
     std::vector<char> fileBytes = readByteFile("/home/misha/Dropbox/hawkeye/tenniscourt/image.raw");
@@ -21,7 +23,6 @@ int main() {
     }
 
     imshow("Image", image);
-
     waitKey(0);
 
     return 0;
@@ -31,7 +32,7 @@ std::vector<char> readByteFile(char const* fileName) {
     std::ifstream ifs(fileName, std::ios::binary | std::ios::ate);
     std::ifstream::pos_type pos = ifs.tellg();
 
-    std::vector<char> result(pos);
+    std::vector<char> result((unsigned long) pos);
 
     ifs.seekg(0, std::ios::beg);
     ifs.read(&result[0], pos);
@@ -46,10 +47,8 @@ Mat byteFileToImage(std::vector<char> bytes) {
     // For each pixel, write the bytes to the image
     for (int x = 0; x < image.rows; x ++) {
         for (int y = 0; y < image.cols; y ++) {
-            int valInt = int(bytes.at((unsigned long) (y * image.rows + x)));
-            uchar valUChar = (uchar) valInt;
-
-            image.at<uchar>(x, y) = valUChar;
+            uchar byte = (uchar) bytes.at((unsigned long) (y * image.rows + x));
+            image.at<uchar>(x, y) = byte;
         }
     }
 
