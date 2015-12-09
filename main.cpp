@@ -14,27 +14,13 @@ int IMAGE_HEIGHT = 550;
 std::vector<char>   readByteFile        (char const* fileName);
 Mat                 byteFileToImage     (std::vector<char> bytes);
 Mat                 doNoiseRemoval      (Mat original);
-Mat                 doEdgeDetection     (Mat original);
-Mat                 doHoughTransform    (Mat original);
+Mat                 doEdgeDetectionSobel(Mat original);
+Mat                 doEdgeDetectionCanny(Mat original);
+Mat                 doLineDetection     (Mat original);
 std::vector<Vec2f>  groupDetectedLines  (std::vector<Vec2f> original);
+std::pair<Point, Point> trimLine            (double rho, double theta, Mat image);
 
 int main() {
-    /*std::vector<cv::Point2f> test, result;
-    test.push_back(Point2f(0, 0));
-    test.push_back(Point2f(0, 1));
-    test.push_back(Point2f(1, 0));
-    test.push_back(Point2f(3, 3));
-    test.push_back(Point2f(4, 3));
-    test.push_back(Point2f(3, 4));
-
-    KMeans km;
-    result = km.run(test, 2, 4);
-
-    for (unsigned int i = 0; i < result.size(); i ++) {
-        printf("%f, %f\n", reqsult.at(i).x, result.at(i).y);
-    }*/
-
-
     std::vector<char> fileBytes = readByteFile("/home/misha/Dropbox/hawkeye/tenniscourt/image.raw");
     Mat image = byteFileToImage(fileBytes);
 
@@ -43,12 +29,11 @@ int main() {
         return -1;
     }
 
-
     Mat noiseRemoved = doNoiseRemoval(image);
-    Mat edgeDetected = doEdgeDetection(noiseRemoved);
-    Mat lineDetected = doHoughTransform(edgeDetected);
+    Mat edgeDetected = doEdgeDetectionCanny(noiseRemoved);
+    Mat lineDetected = doLineDetection(edgeDetected);
 
-    imshow("Image", edgeDetected);
+    imshow("Image", lineDetected);
     waitKey(0);
 
     return 0;
@@ -83,11 +68,11 @@ Mat byteFileToImage(std::vector<char> bytes) {
 
 Mat doNoiseRemoval (Mat original) {
     Mat blurred;
-    GaussianBlur(original, blurred, Size(9, 9), 0, 0);
+    GaussianBlur(original, blurred, Size(15, 15), 0, 0);
     return blurred;
 }
 
-Mat doEdgeDetection (Mat original) {
+Mat doEdgeDetectionSobel(Mat original) {
     Mat edgeDetected, gradX, gradY, absGradX, absGradY, thresholded;
 
     Sobel(original, gradX, CV_16UC1, 1, 0, 3, 1, BORDER_DEFAULT);
@@ -102,34 +87,33 @@ Mat doEdgeDetection (Mat original) {
     return thresholded;
 }
 
-Mat doHoughTransform(Mat original) {
+Mat doEdgeDetectionCanny(Mat original) {
+    Mat edgeDetected;
+    int lowThreshold = 10;
+    Canny(original, edgeDetected, lowThreshold, lowThreshold * 3, 3);
+    return edgeDetected;
+}
+
+Mat doLineDetection(Mat original) {
     Mat image;
     cvtColor(original, image, CV_GRAY2RGB);
 
     std::vector<Vec2f> lines, groupedLines;
-    HoughLines(original, lines, 1, CV_PI/180
-            , 250);
+    HoughLines(original, lines, 1, CV_PI/360, 200);
 //    groupedLines = groupDetectedLines(lines);
 //    lines = groupedLines;
 
+
     for(size_t i = 0; i < lines.size(); i++) {
         float rho = lines[i][0], theta = lines[i][1];
-        printf("%f, %f\n", rho, theta);
-        Point pt1, pt2;
-        double a = cos(theta), b = sin(theta);
-        double x0 = a*rho, y0 = b*rho;
-        pt1.x = cvRound(x0 + 2000*(-b));
-        pt1.y = cvRound(y0 + 2000*(a));
-        pt2.x = cvRound(x0 - 2000*(-b));
-        pt2.y = cvRound(y0 - 2000*(a));
-
-        line(image, pt1, pt2, Scalar(0, 0, 255), 3, CV_AA);
+        std::pair<Point, Point> trimmed = trimLine(rho, theta, original);
+        line(image, std::get<0>(trimmed), std::get<1>(trimmed), Scalar(0, 0, 255), 3, CV_AA);
     }
 
     return image;
 }
 
-std::vector<Vec2f> groupDetectedLines (std::vector<Vec2f> original) {
+std::vector<Vec2f> groupDetectedLines(std::vector<Vec2f> original) {
     std::vector<Point2f> originalPoints, groupedPoints;
 
     for (unsigned int i = 0; i < original.size(); i ++) {
@@ -137,7 +121,7 @@ std::vector<Vec2f> groupDetectedLines (std::vector<Vec2f> original) {
     }
 
     KMeans km;
-    groupedPoints = km.run(originalPoints, 10, 10000);
+    groupedPoints = km.run(originalPoints, 5, 10000);
 
     std::vector<Vec2f> groupedLines;
 
@@ -146,4 +130,25 @@ std::vector<Vec2f> groupDetectedLines (std::vector<Vec2f> original) {
     }
 
     return groupedLines;
+}
+
+std::pair<Point, Point> trimLine(double rho, double theta, Mat image) {
+    Point pt1, pt2;
+    double a = cos(theta), b = sin(theta);
+    double x0 = a*rho, y0 = b*rho;
+
+    double nLeft = x0 / b;
+    double nRight = (x0 - image.cols) / b;
+
+//    nLeft = 2000;
+//    nRight = 2000;
+
+    printf("%f, %f\n", nLeft, nRight);
+
+    pt1.x = cvRound(x0 + nLeft * (-b));
+    pt1.y = cvRound(y0 + nLeft * (a));
+    pt2.x = cvRound(x0 + nRight * (-b));
+    pt2.y = cvRound(y0 + nRight * (a));
+
+    return std::pair<Point, Point>(pt1, pt2);
 }
