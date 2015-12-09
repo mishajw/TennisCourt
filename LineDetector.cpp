@@ -7,7 +7,7 @@
 #include <bitset>
 #include "KMeans.h"
 
-std::vector<std::pair<Point, Point>> LineDetector::identifyLines(String imagePath, int imageWidth, int imageHeight) {
+std::vector<std::pair<Point, Point>> LineDetector::run(String imagePath, int imageWidth, int imageHeight) {
     std::vector<char> fileBytes = readByteFile(imagePath.c_str());
     Mat image = byteFileToImage(fileBytes, imageWidth, imageHeight);
 

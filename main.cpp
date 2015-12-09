@@ -1,4 +1,5 @@
 #include "LineDetector.h"
+#include "LineIdentifier.h"
 
 using namespace std;
 
@@ -8,8 +9,11 @@ int IMAGE_WIDTH = 1392;
 int IMAGE_HEIGHT = 550;
 
 int main() {
-    LineDetector li;
-    vector<pair<Point, Point>> lines = li.identifyLines(IMAGE_PATH, IMAGE_WIDTH, IMAGE_HEIGHT);
+    LineDetector detector;
+    vector<pair<Point, Point>> lines = detector.run(IMAGE_PATH, IMAGE_WIDTH, IMAGE_HEIGHT);
+
+    LineIdentifier identifier;
+    identifier.run(lines);
 
     return 0;
 }

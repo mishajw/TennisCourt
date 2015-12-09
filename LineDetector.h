@@ -11,7 +11,7 @@ using namespace cv;
 
 class LineDetector {
 public:
-    std::vector<std::pair<Point, Point>> identifyLines(String imagePath, int imageWidth, int imageHeight);
+    std::vector<std::pair<Point, Point>> run(String imagePath, int imageWidth, int imageHeight);
 
 private:
     bool usingSobel = false;
