@@ -2,18 +2,18 @@
 // Created by misha on 09/12/15.
 //
 
-#include "LineIndentifier.h"
+#include "LineDetector.h"
 #include <fstream>
 #include <bitset>
 #include "KMeans.h"
 
-void LineIdentifier::identifyLines(String imagePath, int imageWidth, int imageHeight) {
+std::vector<std::pair<Point, Point>> LineDetector::identifyLines(String imagePath, int imageWidth, int imageHeight) {
     std::vector<char> fileBytes = readByteFile(imagePath.c_str());
     Mat image = byteFileToImage(fileBytes, imageWidth, imageHeight);
 
     if (!image.data) {
         printf("Couldn't load image");
-        return;
+        return std::vector<std::pair<Point, Point>>();
     }
 
     Mat noiseRemoved = doNoiseRemoval(image);
@@ -25,13 +25,18 @@ void LineIdentifier::identifyLines(String imagePath, int imageWidth, int imageHe
         edgeDetected = doEdgeDetectionCanny(noiseRemoved);
     }
 
-    Mat lineDetected = doLineDetection(edgeDetected);
+    std::vector<std::pair<Point, Point>> lines = doLineDetection(edgeDetected);
 
+    Mat lineDetected = drawLines(image, lines);
+
+    imwrite("/home/misha/Dropbox/hawkeye/tenniscourt/output.png", lineDetected);
     imshow("Image", lineDetected);
     waitKey(0);
+
+    return lines;
 }
 
-std::vector<char> LineIdentifier::readByteFile(const char* fileName) {
+std::vector<char> LineDetector::readByteFile(const char* fileName) {
     std::ifstream ifs(fileName, std::ios::binary | std::ios::ate);
     std::ifstream::pos_type pos = ifs.tellg();
 
@@ -43,7 +48,7 @@ std::vector<char> LineIdentifier::readByteFile(const char* fileName) {
     return result;
 }
 
-Mat LineIdentifier::byteFileToImage(std::vector<char> bytes, int imageWidth, int imageHeight) {
+Mat LineDetector::byteFileToImage(std::vector<char> bytes, int imageWidth, int imageHeight) {
     // Create the image with one unsigned channel
     Mat image(imageHeight, imageWidth, CV_8UC1);
 
@@ -58,13 +63,13 @@ Mat LineIdentifier::byteFileToImage(std::vector<char> bytes, int imageWidth, int
     return image;
 }
 
-Mat LineIdentifier::doNoiseRemoval (Mat original) {
+Mat LineDetector::doNoiseRemoval (Mat original) {
     Mat blurred;
     GaussianBlur(original, blurred, Size(blurSize, blurSize), 0, 0);
     return blurred;
 }
 
-Mat LineIdentifier::doEdgeDetectionSobel(Mat original) {
+Mat LineDetector::doEdgeDetectionSobel(Mat original) {
     Mat edgeDetected, gradX, gradY, absGradX, absGradY, thresholded, converted;
 
     Sobel(original, gradX, CV_8UC1, 1, 0, 3, 1, BORDER_DEFAULT);
@@ -81,32 +86,48 @@ Mat LineIdentifier::doEdgeDetectionSobel(Mat original) {
     return converted;
 }
 
-Mat LineIdentifier::doEdgeDetectionCanny(Mat original) {
+Mat LineDetector::doEdgeDetectionCanny(Mat original) {
     Mat edgeDetected;
     Canny(original, edgeDetected, cannyThreshold, cannyThreshold * 3, 3);
     return edgeDetected;
 }
 
-Mat LineIdentifier::doLineDetection(Mat original) {
-    Mat image;
-    cvtColor(original, image, CV_GRAY2RGB);
+vector<pair<Point, Point>> LineDetector::doLineDetection(Mat original) {
     std::vector<Vec2f> lines;
+    std::vector<std::pair<Point, Point>> trimmedLines;
+
+    // Perform Hough transform
     HoughLines(original, lines, 1, houghDegIncrements, houghThreshold);
 
+    // Group the lines together
     if (groupLines) {
         lines = groupDetectedLines(lines);
     }
 
+    // Trim the lines
     for(size_t i = 0; i < lines.size(); i++) {
         float rho = lines[i][0], theta = lines[i][1];
-        std::pair<Point, Point> trimmed = trimLine(rho, theta, original);
-        line(image, std::get<0>(trimmed), std::get<1>(trimmed), Scalar(0, 0, 255), 3, CV_AA);
+        trimmedLines.push_back(trimLine(rho, theta, original));
     }
 
-    return image;
+    return trimmedLines;
 }
 
-std::vector<Vec2f> LineIdentifier::groupDetectedLines(std::vector<Vec2f> original) {
+Mat LineDetector::drawLines(Mat image, std::vector<std::pair<Point, Point>> lines) {
+    Mat drawnImage;
+    cvtColor(image, drawnImage, CV_GRAY2RGB);
+
+    for(unsigned int i = 0; i < lines.size(); i++) {
+        line(drawnImage,
+             std::get<0>(lines.at(i)),
+             std::get<1>(lines.at(i)),
+             Scalar(0, 0, 255), 3, CV_AA);
+    }
+
+    return drawnImage;
+}
+
+std::vector<Vec2f> LineDetector::groupDetectedLines(std::vector<Vec2f> original) {
     std::vector<Point2f> originalPoints, groupedPoints;
 
     for (unsigned int i = 0; i < original.size(); i ++) {
@@ -125,7 +146,7 @@ std::vector<Vec2f> LineIdentifier::groupDetectedLines(std::vector<Vec2f> origina
     return groupedLines;
 }
 
-std::pair<Point, Point> LineIdentifier::trimLine(double rho, double theta, Mat original) {
+std::pair<Point, Point> LineDetector::trimLine(double rho, double theta, Mat original) {
     Mat image;
     original.convertTo(image, CV_8UC1);
 //    imshow("test", image);
@@ -170,4 +191,3 @@ std::pair<Point, Point> LineIdentifier::trimLine(double rho, double theta, Mat o
 
     return std::pair<Point, Point>(pt1, pt2);
 }
-
