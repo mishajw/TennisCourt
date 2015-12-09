@@ -15,7 +15,6 @@ public:
     void run(std::vector<Line> lines);
 private:
     std::vector<CourtLine> possibleLines;
-    void setupPossibleLines();
 };
 
 

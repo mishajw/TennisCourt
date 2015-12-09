@@ -18,12 +18,28 @@ Line::Line(cv::Point p1, cv::Point p2) {
     this->y2 = p2.y;
 }
 
+double Line::getLength() {
+    return getDistance(x1, y1, x2, y2);
+}
+
 double Line::getAngle() {
-    return atan(y2 - y1 / x2 - x1);
+    return atan(getM());
 }
 
 double Line::intersectionPercentage(Line l) {
-    return 0;
+    double
+        ourM = getM(),
+        otherM = l.getM(),
+        ourC = getC(),
+        otherC = l.getC();
+
+    double x = (otherC - ourC) / (ourM - otherM);
+    double y = (ourM * x) + ourC;
+
+    printf("%f, %f\n", ourM, ourC);
+    printf("%f, %f\n", otherM, otherC);
+
+    return getDistance(x1, y1, x, y) / getLength();
 }
 
 cv::Point Line::getStart() {
@@ -32,4 +48,19 @@ cv::Point Line::getStart() {
 
 cv::Point Line::getEnd() {
     return cv::Point((int) x2, (int) y2);
+}
+
+double Line::getM() {
+    return (y2 - y1) / (x2 - x1);
+}
+
+double Line::getC() {
+    return y1 - (getM() * x1);
+}
+
+double Line::getDistance(double x1, double y1, double x2, double y2) {
+    return sqrt(
+            pow(x2 - x1, 2) +
+            pow(y2 - y1, 2)
+    );
 }

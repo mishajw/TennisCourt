@@ -15,11 +15,17 @@ public:
     Line(double x1, double y1, double x2, double y2);
     Line(cv::Point p1, cv::Point p2);
 
+    double getLength();
     double getAngle();
     double intersectionPercentage(Line l);
 
     cv::Point getStart();
     cv::Point getEnd();
+
+private:
+    double getM();
+    double getC();
+    double getDistance(double x1, double y1, double x2, double y2);
 };
 
 

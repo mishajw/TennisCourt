@@ -7,7 +7,3 @@
 void LineIdentifier::run(std::vector<Line> lines) {
 
 }
-
-void LineIdentifier::setupPossibleLines() {
-
-}
