@@ -17,13 +17,19 @@ void LineIdentifier::identifyLines(String imagePath, int imageWidth, int imageHe
     }
 
     Mat noiseRemoved = doNoiseRemoval(image);
-    Mat edgeDetected = doEdgeDetectionSobel(noiseRemoved);
+
+    Mat edgeDetected;
+    if (usingSobel) {
+        edgeDetected = doEdgeDetectionSobel(noiseRemoved);
+    } else {
+        edgeDetected = doEdgeDetectionCanny(noiseRemoved);
+    }
+
     Mat lineDetected = doLineDetection(edgeDetected);
 
     imshow("Image", lineDetected);
     waitKey(0);
 }
-
 
 std::vector<char> LineIdentifier::readByteFile(const char* fileName) {
     std::ifstream ifs(fileName, std::ios::binary | std::ios::ate);
@@ -54,7 +60,7 @@ Mat LineIdentifier::byteFileToImage(std::vector<char> bytes, int imageWidth, int
 
 Mat LineIdentifier::doNoiseRemoval (Mat original) {
     Mat blurred;
-    GaussianBlur(original, blurred, Size(15, 15), 0, 0);
+    GaussianBlur(original, blurred, Size(blurSize, blurSize), 0, 0);
     return blurred;
 }
 
@@ -66,9 +72,10 @@ Mat LineIdentifier::doEdgeDetectionSobel(Mat original) {
     convertScaleAbs(gradX, absGradX);
     convertScaleAbs(gradY, absGradY);
 
+    // Weight Y more, because of thinner lines due to camera angle
     addWeighted(absGradX, 0.5, absGradY, 1, 0, edgeDetected);
 
-    threshold(edgeDetected, thresholded, 50, 255, CV_THRESH_BINARY);
+    threshold(edgeDetected, thresholded, sobelThreshold, 255, CV_THRESH_BINARY);
     thresholded.convertTo(converted, CV_8UC1);
 
     return converted;
@@ -76,19 +83,19 @@ Mat LineIdentifier::doEdgeDetectionSobel(Mat original) {
 
 Mat LineIdentifier::doEdgeDetectionCanny(Mat original) {
     Mat edgeDetected;
-    int lowThreshold = 10;
-    Canny(original, edgeDetected, lowThreshold, lowThreshold * 3, 3);
+    Canny(original, edgeDetected, cannyThreshold, cannyThreshold * 3, 3);
     return edgeDetected;
 }
 
 Mat LineIdentifier::doLineDetection(Mat original) {
     Mat image;
     cvtColor(original, image, CV_GRAY2RGB);
-    std::vector<Vec2f> lines, groupedLines;
-    HoughLines(original, lines, 1, CV_PI/720, 200);
+    std::vector<Vec2f> lines;
+    HoughLines(original, lines, 1, houghDegIncrements, houghThreshold);
 
-//    groupedLines = groupDetectedLines(lines);
-//    lines = groupedLines;
+    if (groupLines) {
+        lines = groupDetectedLines(lines);
+    }
 
     for(size_t i = 0; i < lines.size(); i++) {
         float rho = lines[i][0], theta = lines[i][1];
@@ -107,7 +114,7 @@ std::vector<Vec2f> LineIdentifier::groupDetectedLines(std::vector<Vec2f> origina
     }
 
     KMeans km;
-    groupedPoints = km.run(originalPoints, 5, 10000);
+    groupedPoints = km.run(originalPoints, linesToFind, 10000);
 
     std::vector<Vec2f> groupedLines;
 
@@ -144,8 +151,7 @@ std::pair<Point, Point> LineIdentifier::trimLine(double rho, double theta, Mat o
             continue;
         }
 
-        uchar pixel = image.at<uchar>(curX, curY);
-//        printf("%f -> %d\n", i, pixel);
+        uchar pixel = image.at<uchar>(curY, curX);
 
         if (pixel != 0) {
             if (i < nLeftTrimmed) {
@@ -156,13 +162,6 @@ std::pair<Point, Point> LineIdentifier::trimLine(double rho, double theta, Mat o
             }
         }
     }
-
-//    printf("%f, %f\n", nLeft, nRight);
-//    printf(c"%f, %f\n", nLeftTrimmed, nRightTrimmed);
-//    waitKey(0);
-
-    nLeftTrimmed = nLeft;
-    nRightTrimmed = nRight;
 
     pt1.x = cvRound(x0 + nLeftTrimmed * (-b));
     pt1.y = cvRound(y0 + nLeftTrimmed * (a));
