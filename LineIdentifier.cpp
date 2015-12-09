@@ -4,6 +4,10 @@
 
 #include "LineIdentifier.h"
 
-void LineIdentifier::run(std::vector<std::pair<Point, Point>> lines) {
+void LineIdentifier::run(std::vector<Line> lines) {
+
+}
+
+void LineIdentifier::setupPossibleLines() {
 
 }

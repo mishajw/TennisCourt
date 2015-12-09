@@ -3,6 +3,7 @@
 //
 
 #include <opencv2/opencv.hpp>
+#include "Line.h"
 
 #ifndef TENNISCOURT_LINEINDENTIFIER_H
 #define TENNISCOURT_LINEINDENTIFIER_H
@@ -11,7 +12,7 @@ using namespace cv;
 
 class LineDetector {
 public:
-    std::vector<std::pair<Point, Point>> run(String imagePath, int imageWidth, int imageHeight);
+    std::vector<Line> run(String imagePath, int imageWidth, int imageHeight);
 
 private:
     bool usingSobel = false;
@@ -33,13 +34,13 @@ private:
 
     Mat doEdgeDetectionCanny(Mat original);
 
-    std::vector<std::pair<Point, Point>> doLineDetection(Mat original);
+    std::vector<Line> doLineDetection(Mat original);
 
-    Mat drawLines(Mat image, std::vector<std::pair<Point, Point>> lines);
+    Mat drawLines(Mat image, std::vector<Line> lines);
 
     std::vector<Vec2f> groupDetectedLines(std::vector<Vec2f> original);
 
-    std::pair<Point, Point> trimLine(double rho, double theta, Mat original);
+    Line trimLine(double rho, double theta, Mat original);
 };
 
 #endif //TENNISCOURT_LINEINDENTIFIER_H

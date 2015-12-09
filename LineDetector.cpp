@@ -7,13 +7,13 @@
 #include <bitset>
 #include "KMeans.h"
 
-std::vector<std::pair<Point, Point>> LineDetector::run(String imagePath, int imageWidth, int imageHeight) {
+std::vector<Line> LineDetector::run(String imagePath, int imageWidth, int imageHeight) {
     std::vector<char> fileBytes = readByteFile(imagePath.c_str());
     Mat image = byteFileToImage(fileBytes, imageWidth, imageHeight);
 
     if (!image.data) {
         printf("Couldn't load image");
-        return std::vector<std::pair<Point, Point>>();
+        return std::vector<Line>();
     }
 
     Mat noiseRemoved = doNoiseRemoval(image);
@@ -25,7 +25,7 @@ std::vector<std::pair<Point, Point>> LineDetector::run(String imagePath, int ima
         edgeDetected = doEdgeDetectionCanny(noiseRemoved);
     }
 
-    std::vector<std::pair<Point, Point>> lines = doLineDetection(edgeDetected);
+    std::vector<Line> lines = doLineDetection(edgeDetected);
 
     Mat lineDetected = drawLines(image, lines);
 
@@ -92,9 +92,9 @@ Mat LineDetector::doEdgeDetectionCanny(Mat original) {
     return edgeDetected;
 }
 
-vector<pair<Point, Point>> LineDetector::doLineDetection(Mat original) {
+vector<Line> LineDetector::doLineDetection(Mat original) {
     std::vector<Vec2f> lines;
-    std::vector<std::pair<Point, Point>> trimmedLines;
+    std::vector<Line> trimmedLines;
 
     // Perform Hough transform
     HoughLines(original, lines, 1, houghDegIncrements, houghThreshold);
@@ -113,14 +113,14 @@ vector<pair<Point, Point>> LineDetector::doLineDetection(Mat original) {
     return trimmedLines;
 }
 
-Mat LineDetector::drawLines(Mat image, std::vector<std::pair<Point, Point>> lines) {
+Mat LineDetector::drawLines(Mat image, std::vector<Line> lines) {
     Mat drawnImage;
     cvtColor(image, drawnImage, CV_GRAY2RGB);
 
     for(unsigned int i = 0; i < lines.size(); i++) {
         line(drawnImage,
-             std::get<0>(lines.at(i)),
-             std::get<1>(lines.at(i)),
+             lines.at(i).getStart(),
+             lines.at(i).getEnd(),
              Scalar(0, 0, 255), 3, CV_AA);
     }
 
@@ -146,11 +146,9 @@ std::vector<Vec2f> LineDetector::groupDetectedLines(std::vector<Vec2f> original)
     return groupedLines;
 }
 
-std::pair<Point, Point> LineDetector::trimLine(double rho, double theta, Mat original) {
+Line LineDetector::trimLine(double rho, double theta, Mat original) {
     Mat image;
     original.convertTo(image, CV_8UC1);
-//    imshow("test", image);
-//    waitKey(0);
 
     Point pt1, pt2;
     double a = cos(theta), b = sin(theta);
@@ -189,5 +187,5 @@ std::pair<Point, Point> LineDetector::trimLine(double rho, double theta, Mat ori
     pt2.x = cvRound(x0 + nRightTrimmed * (-b));
     pt2.y = cvRound(y0 + nRightTrimmed * (a));
 
-    return std::pair<Point, Point>(pt1, pt2);
+    return Line(pt1, pt2);
 }

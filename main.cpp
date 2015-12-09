@@ -10,7 +10,7 @@ int IMAGE_HEIGHT = 550;
 
 int main() {
     LineDetector detector;
-    vector<pair<Point, Point>> lines = detector.run(IMAGE_PATH, IMAGE_WIDTH, IMAGE_HEIGHT);
+    vector<Line> lines = detector.run(IMAGE_PATH, IMAGE_WIDTH, IMAGE_HEIGHT);
 
     LineIdentifier identifier;
     identifier.run(lines);

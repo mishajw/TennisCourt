@@ -3,6 +3,7 @@
 //
 
 #include <opencv2/opencv.hpp>
+#include "CourtLine.h"
 
 #ifndef TENNISCOURT_LINEIDENTIFIER_H
 #define TENNISCOURT_LINEIDENTIFIER_H
@@ -11,7 +12,10 @@ using namespace cv;
 
 class LineIdentifier {
 public:
-    void run(std::vector<std::pair<Point, Point>> lines);
+    void run(std::vector<Line> lines);
+private:
+    std::vector<CourtLine> possibleLines;
+    void setupPossibleLines();
 };
 
 
