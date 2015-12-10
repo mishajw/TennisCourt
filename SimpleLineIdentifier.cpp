@@ -4,7 +4,7 @@
 
 #include "SimpleLineIdentifier.h"
 
-void SimpleLineIdentifier::run(vector<Line> lines, Mat image) {
+vector<pair<string, Line>> SimpleLineIdentifier::run(vector<Line> lines, Mat image) {
     vector<string> horizontalPossible;
     horizontalPossible.push_back("service line");
     horizontalPossible.push_back("base line");
@@ -30,28 +30,41 @@ void SimpleLineIdentifier::run(vector<Line> lines, Mat image) {
     vector<string> horizontalLabels = labelLines(horizontalMidpoints, getPossibleHorizontals());
     vector<string> verticalLabels = labelLines(verticalMidpoints, getPossibleVerticals());
 
+    vector<pair<string, Line>> labeledLines;
+
+
+
     Mat drawn = drawLines(image, lines, Scalar(255,0,0));
 
     for (unsigned int i = 0; i < horizontal.size(); i++) {
+        string label = horizontalLabels.at(i);
         putText(drawn,
-                horizontalLabels.at(i),
+                label,
                 Point(i * 200, (int) horizontalMidpoints.at(i)),
                 0,
                 0.5,
                 Scalar(0, 0, 255));
+
+        labeledLines.push_back(pair<string, Line>(label, horizontal.at(i)));
     }
 
     for (unsigned int i = 0; i < vertical.size(); i++) {
+        string label = verticalLabels.at(i);
+
         putText(drawn,
-                verticalLabels.at(i),
+                label,
                 Point((int) verticalMidpoints.at(i), 30 + i * 40),
                 0,
                 0.5,
                 Scalar(0, 255, 0));
+
+        labeledLines.push_back(pair<string, Line>(label, horizontal.at(i)));
     }
 
     imshow("Labeled Lines", drawn);
     waitKey(0);
+
+    return labeledLines;
 }
 
 pair<vector<Line>, vector<Line>> SimpleLineIdentifier::groupLines(vector<Line> lines) {
@@ -114,7 +127,6 @@ vector<string> SimpleLineIdentifier::labelLines(vector<double> midPoints, vector
     return labeledLines;
 }
 
-
 vector<SimpleLineIdentifier::LineDetail> SimpleLineIdentifier::getPossibleHorizontals() {
     LineDetail baseline;
     baseline.name = "base line";
@@ -132,28 +144,28 @@ vector<SimpleLineIdentifier::LineDetail> SimpleLineIdentifier::getPossibleHorizo
 }
 
 vector<SimpleLineIdentifier::LineDetail> SimpleLineIdentifier::getPossibleVerticals() {
-    LineDetail sideline;
-    sideline.name = "sideline";
-    sideline.relativePosition = 0;
+//    LineDetail sideline;
+//    sideline.name = "sideline";
+//    sideline.relativePosition = 0;
 
     LineDetail singles;
     singles.name = "singles sideline";
     singles.relativePosition = (27.0 / 36.0) / 2.0;
-    
+
     LineDetail service;
     service.name = "centre service line";
     service.relativePosition = 0.5;
 
     LineDetail singles2;
     singles2.name = "singles sideline";
-    singles2.relativePosition = 1 - (27.0 / 36.0) / 2.0;
+    singles2.relativePosition = 0.9; // 1.0 - (27.0 / 36.0) / 2.0;
 
     LineDetail sideline2;
     sideline2.name = "sideline";
     sideline2.relativePosition = 1;
 
     vector<LineDetail> possibles;
-    possibles.push_back(sideline);
+//    possibles.push_back(sideline);
     possibles.push_back(singles);
     possibles.push_back(service);
     possibles.push_back(singles2);

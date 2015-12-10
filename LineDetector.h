@@ -20,7 +20,7 @@ private:
     int houghThreshold = 180;
     int blurSize = 15;
     int sobelThreshold = 50;
-    int cannyThreshold = 10;
+    int cannyThreshold = 50;
     bool groupLines = true;
     int linesToFind = 10;
 

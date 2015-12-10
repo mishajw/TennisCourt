@@ -15,12 +15,6 @@ std::vector<char> readByteFile(const char* fileName);
 Mat byteFileToImage(std::vector<char> bytes, int imageWidth, int imageHeight);
 
 int main() {
-
-//    Line l1(0, 0, 90, 90);
-//    Line l2(0, 90, 90, 0);
-//    printf("Angles: %f, %f\n", l1.getAngle(), l2.getAngle());
-//    printf("Intersect: %f\n", l1.intersectionPercentage(l2));
-
     std::vector<char> fileBytes = readByteFile(IMAGE_PATH.c_str());
     Mat image = byteFileToImage(fileBytes, IMAGE_WIDTH, IMAGE_HEIGHT);
 

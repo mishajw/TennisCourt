@@ -8,9 +8,13 @@
 #include "KMeans.h"
 
 std::vector<Line> LineDetector::run(Mat image) {
-
+    imshow("", image);
+    waitKey(0);
 
     Mat noiseRemoved = doNoiseRemoval(image);
+
+    imshow("", noiseRemoved);
+    waitKey(0);
 
     Mat edgeDetected;
     if (usingSobel) {
@@ -19,13 +23,16 @@ std::vector<Line> LineDetector::run(Mat image) {
         edgeDetected = doEdgeDetectionCanny(noiseRemoved);
     }
 
+    imshow("", edgeDetected);
+    waitKey(0);
+
     std::vector<Line> lines = doLineDetection(edgeDetected);
 
     Mat lineDetected = drawLines(image, lines);
 
     imwrite("/home/misha/Dropbox/hawkeye/tenniscourt/output.png", lineDetected);
-//    imshow("Image", lineDetected);
-//    waitKey(0);
+    imshow("", lineDetected);
+    waitKey(0);
 
     return lines;
 }
