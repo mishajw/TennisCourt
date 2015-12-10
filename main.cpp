@@ -3,6 +3,7 @@
 #include <fstream>
 #include <bitset>
 #include "SimpleLineIdentifier.h"
+#include "CSVExporter.h"
 
 using namespace std;
 
@@ -15,6 +16,11 @@ std::vector<char> readByteFile(const char* fileName);
 Mat byteFileToImage(std::vector<char> bytes, int imageWidth, int imageHeight);
 
 int main() {
+//    Line l(1337, 300, 4, 284);
+//    Line l(0, 100, 0, 200);
+//    const Point &point_ = l.getPointOnLine(0.1);
+//    printf("(%d, %d)", point_.x, point_.y);
+
     std::vector<char> fileBytes = readByteFile(IMAGE_PATH.c_str());
     Mat image = byteFileToImage(fileBytes, IMAGE_WIDTH, IMAGE_HEIGHT);
 
@@ -27,7 +33,10 @@ int main() {
     vector<Line> lines = detector.run(image);
 
     SimpleLineIdentifier identifier;
-    identifier.run(lines, image);
+    vector<pair<string, Line>> labeledLines = identifier.run(lines, image);
+
+    CSVExporter exporter;
+    exporter.run(labeledLines, "/home/misha/Dropbox/hawkeye/tenniscourt/detected-lines.csv");
 
     return 0;
 }

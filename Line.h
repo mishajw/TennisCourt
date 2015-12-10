@@ -24,6 +24,7 @@ public:
     cv::Point getStart();
     cv::Point getEnd();
 
+    cv::Point getPointOnLine(double i);
     cv::Point getMidPoint();
 
     std::string toString();

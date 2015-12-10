@@ -62,6 +62,12 @@ double Line::getDistance(double x1, double y1, double x2, double y2) {
     );
 }
 
+cv::Point Line::getPointOnLine(double i) {
+    return cv::Point(
+            (int) ((x1 * (1 - i)) + (x2 * i)),
+            (int) ((y1 * (1 - i)) + (y2 * i)));
+}
+
 cv::Point Line::getMidPoint() {
     return cv::Point((int) ((x1 + x2) / 2), (int) ((y1 + y2) / 2));
 }
