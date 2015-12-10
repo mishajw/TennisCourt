@@ -12,9 +12,10 @@ using namespace cv;
 
 class LineDetector {
 public:
-    std::vector<Line> run(Mat image);
+    std::vector<Line> run(Mat image, string exportPath);
 
 private:
+    // Parameters for detection, tweaked for this case
     bool usingSobel = false;
     double houghDegIncrements = CV_PI / 360.0;
     int houghThreshold = 180;

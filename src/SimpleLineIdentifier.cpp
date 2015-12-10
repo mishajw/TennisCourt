@@ -4,7 +4,8 @@
 
 #include "SimpleLineIdentifier.h"
 
-vector<pair<string, Line>> SimpleLineIdentifier::run(vector<Line> lines, Mat image) {
+vector<pair<string, Line>> SimpleLineIdentifier::run(vector<Line> lines, Mat image, string exportPath) {
+    // Setup possible lines
     vector<string> horizontalPossible;
     horizontalPossible.push_back("service line");
     horizontalPossible.push_back("base line");
@@ -15,8 +16,11 @@ vector<pair<string, Line>> SimpleLineIdentifier::run(vector<Line> lines, Mat ima
     verticalPossible.push_back("centre service line");
     verticalPossible.push_back("singles sideline");
 
+    // Group the lines
     pair<vector<Line>, vector<Line>> grouped = groupLines(lines);
     vector<Line> horizontal = grouped.first, vertical = grouped.second;
+
+    // Create midpoints
     vector<double> horizontalMidpoints, verticalMidpoints;
 
     for (unsigned int i = 0; i < horizontal.size(); i++) {
@@ -27,13 +31,13 @@ vector<pair<string, Line>> SimpleLineIdentifier::run(vector<Line> lines, Mat ima
         verticalMidpoints.push_back(vertical.at(i).getMidPoint().x);
     }
 
+    // Create the labels
     vector<string> horizontalLabels = labelLines(horizontalMidpoints, getPossibleHorizontals());
     vector<string> verticalLabels = labelLines(verticalMidpoints, getPossibleVerticals());
 
     vector<pair<string, Line>> labeledLines;
 
-
-
+    // Draw the labels and lines on to the images
     Mat drawn = drawLines(image, lines, Scalar(255,0,0));
 
     for (unsigned int i = 0; i < horizontal.size(); i++) {
@@ -61,8 +65,7 @@ vector<pair<string, Line>> SimpleLineIdentifier::run(vector<Line> lines, Mat ima
         labeledLines.push_back(pair<string, Line>(label, horizontal.at(i)));
     }
 
-    imshow("Labeled Lines", drawn);
-    waitKey(0);
+    imwrite(exportPath + "/labeledLines.png", drawn);
 
     return labeledLines;
 }

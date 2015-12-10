@@ -7,22 +7,29 @@
 
 using namespace std;
 
-// Globals
-String IMAGE_PATH = "/home/misha/Dropbox/hawkeye/tenniscourt/image.raw";
-int IMAGE_WIDTH = 1392;
-int IMAGE_HEIGHT = 550;
-
+// Function headers
 std::vector<char> readByteFile(const char* fileName);
 Mat byteFileToImage(std::vector<char> bytes, int imageWidth, int imageHeight);
 
-int main() {
-//    Line l(1337, 300, 4, 284);
-//    Line l(0, 100, 0, 200);
-//    const Point &point_ = l.getPointOnLine(0.1);
-//    printf("(%d, %d)", point_.x, point_.y);
+int main(int argc, char* argv[]) {
+    string imagePath, exportPath;
+    int imageWidth, imageHeight;
 
-    std::vector<char> fileBytes = readByteFile(IMAGE_PATH.c_str());
-    Mat image = byteFileToImage(fileBytes, IMAGE_WIDTH, IMAGE_HEIGHT);
+    if (argc != 4) {
+        printf("To pass in: image location, export path, image width, image height.\n");
+        imagePath = "/home/misha/Dropbox/hawkeye/tenniscourt/res/image.raw";
+        exportPath = "/home/misha/Dropbox/hawkeye/tenniscourt/out/";
+        imageWidth = 1392;
+        imageHeight = 550;
+    } else {
+        imagePath = argv[0];
+        exportPath = argv[0];
+        imageWidth = atoi(argv[0]);
+        imageHeight = atoi(argv[0]);
+    }
+
+    std::vector<char> fileBytes = readByteFile(imagePath.c_str());
+    Mat image = byteFileToImage(fileBytes, imageWidth, imageHeight);
 
     if (!image.data) {
         printf("Couldn't load image");
@@ -30,13 +37,13 @@ int main() {
     }
 
     LineDetector detector;
-    vector<Line> lines = detector.run(image);
+    vector<Line> lines = detector.run(image, exportPath);
 
     SimpleLineIdentifier identifier;
-    vector<pair<string, Line>> labeledLines = identifier.run(lines, image);
+    vector<pair<string, Line>> labeledLines = identifier.run(lines, image, exportPath);
 
     CSVExporter exporter;
-    exporter.run(labeledLines, "/home/misha/Dropbox/hawkeye/tenniscourt/detected-lines.csv");
+    exporter.run(labeledLines, exportPath + "/detected-lines.csv");
 
     return 0;
 }

@@ -12,7 +12,7 @@ using namespace cv;
 
 class SimpleLineIdentifier {
 public:
-    vector<pair<string, Line>> run(vector<Line> lines, Mat image);
+    vector<pair<string, Line>> run(vector<Line> lines, Mat image, string exportPath);
 
 private:
     struct LineDetail {

@@ -38,7 +38,6 @@ vector<cv::Point> CSVExporter::getPointsOnLine(Line line, double amount) {
     vector<cv::Point> points;
 
     for (double i = 0; i <= 1; i += amount / line.getLength()) {
-        printf("%f\n", i);
         points.push_back(line.getPointOnLine(i));
     }
 

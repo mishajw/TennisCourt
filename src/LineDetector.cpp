@@ -7,14 +7,9 @@
 #include <bitset>
 #include "KMeans.h"
 
-std::vector<Line> LineDetector::run(Mat image) {
-//    imshow("", image);
-//    waitKey(0);
-
+std::vector<Line> LineDetector::run(Mat image, string exportPath) {
     Mat noiseRemoved = doNoiseRemoval(image);
-
-//    imshow("", noiseRemoved);
-//    waitKey(0);
+    imwrite(exportPath + "/noiseRemoved.png", noiseRemoved);
 
     Mat edgeDetected;
     if (usingSobel) {
@@ -22,17 +17,11 @@ std::vector<Line> LineDetector::run(Mat image) {
     } else {
         edgeDetected = doEdgeDetectionCanny(noiseRemoved);
     }
-
-//    imshow("", edgeDetected);
-//    waitKey(0);
+    imwrite(exportPath + "/edgeDetected.png", edgeDetected);
 
     std::vector<Line> lines = doLineDetection(edgeDetected);
-
     Mat lineDetected = drawLines(image, lines);
-
-    imwrite("/home/misha/Dropbox/hawkeye/tenniscourt/output.png", lineDetected);
-//    imshow("", lineDetected);
-//    waitKey(0);
+    imwrite(exportPath + "/lineDetected.png", lineDetected);
 
     return lines;
 }
