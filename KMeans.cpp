@@ -56,7 +56,7 @@ std::vector<cv::Point2f> KMeans::run(std::vector<cv::Point2f> points, int k, int
             cv::Point2f currentMeans = means.at(j);
             double currentDist = sqrt(
                     pow(applyRange(currentMeans.x, maxX, minX) - applyRange(currentPoint.x, maxX, minX), 2) +
-                    pow(applyRange(currentMeans.y, maxY, minY) - applyRange(currentPoint.y, maxY, minY), 2));
+                    pow(applyRange(currentMeans.y, maxY, minY) - applyRange(currentPoint.y, maxY, minY), 2) );
 
 //            printf("CurDist: %f\n", currentDist);
 

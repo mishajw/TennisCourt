@@ -15,31 +15,35 @@ using namespace std;
 class CourtLine {
 public:
     Line line;
-    const string name;
-    const double *neighbours;
+    const char* name;
+    vector<double> neighbours;
 
-    CourtLine(Line _line, string _name, double _neighbours[]);
-    map<Line, CourtLine> parsePossibleNeighbours(vector<Line> lines);
+    CourtLine(Line _line, vector<Line> otherLines);
+    CourtLine(const char* _name, vector<double> _neighbours);
+    CourtLine(const char* _name, double *_neighbours, int neighbourSize);
+
+    void initNeighboursWithLines(vector<Line> lines);
+    double compareWith(CourtLine *otherLine);
+
     // Factory functions
-    static vector<CourtLine> createAllLines(Line line);
+    static vector<CourtLine> createAllLines();
 
 private:
     bool isRightAngle(Line l);
 
     // Accuracy
-    static constexpr double ACCURACY_ANGLES = CV_PI / 3;
-    static constexpr double ACCURACY_PLACEMENT = 0.2;
+    static constexpr double ACCURACY_ANGLES = CV_PI / 6;
+    static constexpr double ACCURACY_PLACEMENT = 0.4;
     // Distances between lines
-    static constexpr double SIDE_TO_SINGLES = (27 / 36) / 2;
-    static constexpr double BASE_TO_SERVICE = 21 / 39;
-    static constexpr double SIDE_TO_CENTRE = 1 / 2;
+    static constexpr double SIDE_TO_SINGLES = (27.0 / 36.0) / 2.0;
+    static constexpr double BASE_TO_SERVICE = 21.0 / 39.0;
 
     // Factory functions
-    static CourtLine createBaseLine(Line line);
-    static CourtLine createServiceLine(Line line);
-    static CourtLine createCentreServiceLine(Line line);
-    static CourtLine createSideLine(Line line);
-    static CourtLine createSinglesSideLine(Line line);
+    static CourtLine createBaseLine();
+    static CourtLine createServiceLine();
+    static CourtLine createCentreServiceLine();
+    static CourtLine createSideLine();
+    static CourtLine createSinglesSideLine();
 };
 
 #endif //TENNISCOURT_COURTLINE_H

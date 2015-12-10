@@ -12,7 +12,7 @@ using namespace cv;
 
 class LineDetector {
 public:
-    std::vector<Line> run(String imagePath, int imageWidth, int imageHeight);
+    std::vector<Line> run(Mat image);
 
 private:
     bool usingSobel = false;
@@ -23,10 +23,6 @@ private:
     int cannyThreshold = 10;
     bool groupLines = true;
     int linesToFind = 10;
-
-    std::vector<char> readByteFile(char const *fileName);
-
-    Mat byteFileToImage(std::vector<char> bytes, int imageWidth, int imageHeight);
 
     Mat doNoiseRemoval(Mat original);
 

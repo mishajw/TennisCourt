@@ -36,9 +36,6 @@ double Line::intersectionPercentage(Line l) {
     double x = (otherC - ourC) / (ourM - otherM);
     double y = (ourM * x) + ourC;
 
-    printf("%f, %f\n", ourM, ourC);
-    printf("%f, %f\n", otherM, otherC);
-
     return getDistance(x1, y1, x, y) / getLength();
 }
 
@@ -63,4 +60,14 @@ double Line::getDistance(double x1, double y1, double x2, double y2) {
             pow(x2 - x1, 2) +
             pow(y2 - y1, 2)
     );
+}
+
+cv::Point Line::getMidPoint() {
+    return cv::Point((int) ((x1 + x2) / 2), (int) ((y1 + y2) / 2));
+}
+
+std::string Line::toString() {
+    return "Line((" +
+            to_string(x1) + "," + to_string(y1) + ") to (" +
+            to_string(x2) + "," + to_string(y1) + "))";
 }

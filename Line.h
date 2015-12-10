@@ -8,6 +8,8 @@
 
 #include <opencv2/opencv.hpp>
 
+using namespace std;
+
 class Line {
 public:
     double x1, y1, x2, y2;
@@ -21,6 +23,10 @@ public:
 
     cv::Point getStart();
     cv::Point getEnd();
+
+    cv::Point getMidPoint();
+
+    std::string toString();
 
 private:
     double getM();
