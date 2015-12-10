@@ -1,10 +1,7 @@
 #include "LineDetector.h"
-#include "LineIdentifier.h"
 
-#include "LineDetector.h"
 #include <fstream>
 #include <bitset>
-#include "KMeans.h"
 #include "SimpleLineIdentifier.h"
 
 using namespace std;
