@@ -15,17 +15,17 @@ int main(int argc, char* argv[]) {
     string imagePath, exportPath;
     int imageWidth, imageHeight;
 
-    if (argc != 4) {
+    if (argc != 5) {
         printf("To pass in: image location, export path, image width, image height.\n");
         imagePath = "/home/misha/Dropbox/hawkeye/tenniscourt/res/image.raw";
         exportPath = "/home/misha/Dropbox/hawkeye/tenniscourt/out/";
         imageWidth = 1392;
         imageHeight = 550;
     } else {
-        imagePath = argv[0];
-        exportPath = argv[0];
-        imageWidth = atoi(argv[0]);
-        imageHeight = atoi(argv[0]);
+        imagePath = argv[1];
+        exportPath = argv[2];
+        imageWidth = atoi(argv[3]);
+        imageHeight = atoi(argv[4]);
     }
 
     std::vector<char> fileBytes = readByteFile(imagePath.c_str());
